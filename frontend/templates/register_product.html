@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Produtos</title>
+</head>
+<body>
+    <h1>Produtos Cadastrados</h1>
+    <div id="products-list"></div>
+
+    <h2>Cadastrar Novo Produto</h2>
+    <form id="product-form">
+        <input type="text" id="name" placeholder="Nome do Produto" required />
+        <textarea id="description" placeholder="Descrição"></textarea>
+        <input type="number" id="price" placeholder="Preço" required />
+        <input type="number" id="quantity" placeholder="Quantidade" required />
+        <button type="submit">Cadastrar Produto</button>
+    </form>
+
+    <script>
+        // Carregar produtos cadastrados
+        async function loadProducts() {
+            const response = await fetch('http://127.0.0.1:5001/api/products');
+            const products = await response.json();
+
+            const productsList = document.getElementById('products-list');
+            productsList.innerHTML = products.map(product => `
+                <div>
+                    <h3>${product.name}</h3>
+                    <p>${product.description}</p>
+                    <p>Preço: ${product.price}</p>
+                    <p>Quantidade: ${product.quantity}</p>
+                </div>
+            `).join('');
+        }
+
+        // Cadastrar novo produto
+        const form = document.getElementById('product-form');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const productData = {
+                name: document.getElementById('name').value,
+                description: document.getElementById('description').value,
+                price: parseFloat(document.getElementById('price').value),
+                quantity: parseInt(document.getElementById('quantity').value, 10)
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:5001/api/products', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+
+                if (response.ok) {
+                    alert('Produto cadastrado com sucesso!');
+                    form.reset(); // Limpar o formulário
+                    loadProducts(); // Atualizar a lista de produtos
+                } else {
+                    const errorData = await response.json();
+                    alert(`Erro ao cadastrar produto: ${errorData.message}`);
+                }
+            } catch (error) {
+                alert('Erro de conexão com o servidor.');
+                console.error(error);
+            }
+        });
+
+        // Carregar produtos na inicialização
+        loadProducts();
+    </script>
+</body>
+</html>
