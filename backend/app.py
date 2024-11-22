@@ -1,8 +1,10 @@
 from flask import Flask
 from db import db
 from routes.users import users_bp
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -12,4 +14,4 @@ app.register_blueprint(users_bp)
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()  # Garante a criação das tabelas
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
